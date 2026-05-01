@@ -1,0 +1,19 @@
+#i plan to use tkinter as the ui of the calculator
+import tkinter as tk
+from tkinter import messagebox
+
+#calculator math functions
+
+def add(a, b):
+    return a + b
+
+def subtract(a, b):
+    return a - b
+
+def multiply(a, b):
+    return a * b
+
+def divide(a, b):
+    if b == 0:
+        raise ValueError ("Cannot divide by zero")
+    return a / b
