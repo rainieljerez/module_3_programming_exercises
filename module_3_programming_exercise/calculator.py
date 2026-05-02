@@ -31,7 +31,7 @@ def calculate(operation, num_1, num_2):
 def format_result(value):
     return f"{float(value):.10g}"
 
-class Calculator(tk. Tk):
+class SimpleCalculatorApp(tk. Tk):
 #elements of the ui
     BG = "#1e1e2e"
     PANEL = "#2a2a3d"
@@ -163,9 +163,55 @@ class Calculator(tk. Tk):
             highlighcolor = self.ACCENT,
         )
         entry.pack(fill = "x", padx = 24, pady = (0,8), ipadx =6, ipady = 8)
+#exception handlers
+#ensures that input should be numbers only
+    def _on_calculate(self):
+        try:
+            num_1 = float(self.num1_var.get().strip())
+        except ValueError:
+            self._show_error("First input is invalid. Enter a numerical value")
+            return
 
-        
+        try:
+            num_2 = float(self.num2_var.get().strip())
+        except ValueError:
+            self._show_error("Second input is invalid. Enter a numerical value")
+            return
+#perform calculation
+        try:
+            operation = self.operation_var.get()
+            symbol, result = calculate(operation, num_1, num_2)
+            formatted = f"{float(result)}:.4f"
+            expression = f"{float(num_1):.4f} {symbol} {float(num_2):.4f} = {formatted}"
+            self.result_label.config(text = expression, fg = self.SUCCESS)
+        except ValueError as e:
+            self._show_error(str(e))
 
+    def _on_try_again(self):
+        self.num1_var.set("")
+        self.num2_var.set("")
+        self.operation_var.set("")
+        self.result_label.config(text = "-", fg = self.SUCCESS)
+
+    def _on_exit(self):
+        messagebox.showinfo("Exiting Program")
+        self.destroy()
+
+    def _show_error(self, message):
+        self.result_label.config(text = f"{message}", fg = self.ERROR)
+        messagebox.showerror("Input Error", message)
+
+    def _center_window(self, w, h):
+        self.update_idletasks()
+        sw = self.winfo_screenwidth()
+        sh = self.winfo_screenheight()
+        x = (sw - w) // 2
+        y = (sh - h) // 2
+        self.geometry(f"{w}x{h}+{x}+{y}")
+
+if __name__ == "__main__":
+    app = SimpleCalculatorApp()
+    app.mainloop()
 
 
 
