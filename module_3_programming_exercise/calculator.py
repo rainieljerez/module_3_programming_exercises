@@ -50,7 +50,7 @@ class SimpleCalculatorApp(tk. Tk):
         self.configure(bg=self.BG)
 
         self._build_ui()
-        self._center_window(420,560)
+        self._center_window(480,600)
 
     def _build_ui(self):
         pad = dict(padx=24, pady=8)
@@ -122,7 +122,10 @@ class SimpleCalculatorApp(tk. Tk):
         self.result_label = tk.Label(
             result_frame, text = "-",
             bg = self.PANEL, fg = self.SUCCESS,
-            font = ("Segeo UI", 22, "bold")
+            font = ("Segeo UI", 15, "bold"),
+            wraplength = 360,
+            justify = "left",
+            anchor = "w"
         )
         self.result_label.pack(anchor = "w", padx = 14, pady = (0, 12))
 
