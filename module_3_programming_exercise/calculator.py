@@ -38,7 +38,7 @@ def square_root(num_1, _):
     return math.sqrt(num_1)
 
 def cube_root (num_1, _):
-    return math.copysign(abs(num_1) * (1/3), num_1)
+    return math.copysign(abs(num_1) ** (1/3), num_1)
 
 OPERATIONS = {
     "Addition": (add, "+", True),
@@ -54,7 +54,7 @@ OPERATIONS = {
 
 def calculate(operation, num_1, num_2):
 
-    func, symbol = OPERATIONS[operation]
+    func, symbol, _ = OPERATIONS[operation]
     return symbol, func(num_1, num_2)
 #Returns a float value
 def format_result(value):
@@ -75,13 +75,13 @@ class SimpleCalculatorApp(tk. Tk):
     def __init__(self):
         super().__init__()
         self.title("Calculator")
-        self.resizable(width=True, height=True)
-        self.configure(bg=self.BG)
+        self.resizable(width = False, height = False)
+        self.configure(bg = self.BG)
         self._build_ui()
         self._center_window(500,600)
 
     def _build_ui(self):
-        pad = dict(padx=24, pady=6)
+        pad = dict(padx = 24, pady = 6)
 
         tk.Label(
             self, text="Calculator", bg = self.BG, fg = self.WHITE,
@@ -196,20 +196,21 @@ class SimpleCalculatorApp(tk. Tk):
         )
         entry.pack(fill = "x", padx = 24, pady = (0,8), ipadx =6, ipady = 8)
 #second number depends on the operation chosen
-def _on_operation_change(self, *_):
-    operation_2nd_num = self.operation_var.get()
-    _,_, needs_second = OPERATIONS.get(operation_2nd_num, (None, None, True))
-    state = "normal" if needs_second else "disabled"
-    self.num2_entry.config(state = state)
-    fg_color = self.SUBTEXT if needs_second else "#555570"
-    self.num2_label.config(fg=fg_color)
-    if not needs_second:
-        self.num2_var.set("-")
-    else:
-        if self.num2_var.get() == "-":
-            self.num2_var.set("")
+    def _on_operation_change(self, *_):
+        operation_2nd_num = self.operation_var.get()
+        _,_, needs_second = OPERATIONS.get(operation_2nd_num, (None, None, True))
+        state = "normal" if needs_second else "disabled"
+        self.num2_entry.config(state = state)
+        fg_color = self.SUBTEXT if needs_second else "#555570"
+        self.num2_label.config(fg=fg_color)
+        if not needs_second:
+            self.num2_var.set("-")
+        else:
+            if self.num2_var.get() == "-":
+                self.num2_var.set("")
 #exception handlers
 #ensures that input should be numbers only
+#perform calculation
     def _on_calculate(self):
         try:
             num_1 = float(self.num1_var.get().strip())
@@ -217,7 +218,7 @@ def _on_operation_change(self, *_):
             self._show_error("First input is invalid. Enter a numerical value")
             return
         operation_2nd_num = self.operation_var.get()
-        _,_, needs_second = OPERATIONS[operation_2nd_num]
+        _, _, needs_second = OPERATIONS[operation_2nd_num]
         if needs_second:
             try:
                 num_2 = float(self.num2_var.get().strip())
@@ -226,17 +227,13 @@ def _on_operation_change(self, *_):
                 return
         else:
             num_2 = 0.0
-
-
-
-#perform calculation
         try:
             symbol, result = calculate(operation_2nd_num, num_1, num_2)
             formatted = f"{float(result):.4f}"
             if needs_second:
                 expression = f"{float(num_1):.4f} {symbol} {float(num_2):.4f} = {formatted}"
             else:
-                expression = f"{symbol}(float(num_1):.4f) = {formatted}"
+                expression = f"{symbol}({float(num_1):.4f}) = {formatted}"
             self.result_label.config(text=expression, fg=self.SUCCESS)
         except ValueError as e:
             self._show_error(str(e))
