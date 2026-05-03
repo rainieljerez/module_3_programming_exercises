@@ -92,7 +92,7 @@ class SimpleCalculatorApp(tk. Tk):
                 font = ("Segoe UI", 10), indicatoron = True, bd = 0,
                 highlightthickness = 0
             )
-            rb.grid(row = col // 2, column = 2, sticky = "w", padx =12, pady = 6)
+            rb.grid(row = col // 2, column = col % 2, sticky = "w", padx =12, pady = 6)
 
         self.num1_var = tk.StringVar()
         self.num2_var = tk.StringVar()
@@ -142,7 +142,7 @@ class SimpleCalculatorApp(tk. Tk):
             button_row, text = "Exit",
             bg = self.PANEL, fg = self.TEXT,
             activebackground = self.ERROR, activeforeground = self.WHITE,
-            font = ("Segou UI", 10), relief = "flat", cursor = "hand2",
+            font = ("Segoe UI", 10), relief = "flat", cursor = "hand2",
             padx = 14, pady = 8,
             command = self._on_exit
         ).pack (side = "left", padx = 8)
@@ -160,7 +160,7 @@ class SimpleCalculatorApp(tk. Tk):
             relief = "flat", font = ("Segoe UI", 13),
             highlightthickness = 2,
             highlightbackground = self.PANEL,
-            highlighcolor = self.ACCENT,
+            highlightcolor = self.ACCENT,
         )
         entry.pack(fill = "x", padx = 24, pady = (0,8), ipadx =6, ipady = 8)
 #exception handlers
@@ -181,7 +181,7 @@ class SimpleCalculatorApp(tk. Tk):
         try:
             operation = self.operation_var.get()
             symbol, result = calculate(operation, num_1, num_2)
-            formatted = f"{float(result)}:.4f"
+            formatted = f"{float(result):.4f}"
             expression = f"{float(num_1):.4f} {symbol} {float(num_2):.4f} = {formatted}"
             self.result_label.config(text = expression, fg = self.SUCCESS)
         except ValueError as e:
@@ -190,11 +190,11 @@ class SimpleCalculatorApp(tk. Tk):
     def _on_try_again(self):
         self.num1_var.set("")
         self.num2_var.set("")
-        self.operation_var.set("")
+        self.operation_var.set("Addition")
         self.result_label.config(text = "-", fg = self.SUCCESS)
 
     def _on_exit(self):
-        messagebox.showinfo("Exiting Program")
+        messagebox.showinfo("Exiting Program", "Thank you for using the Simple Calculator App")
         self.destroy()
 
     def _show_error(self, message):
