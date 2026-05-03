@@ -2,6 +2,7 @@
 
 import tkinter as tk
 from tkinter import messagebox
+import math
 
 #Calculator math functions
 def add(num_1, num_2):
@@ -18,14 +19,42 @@ def divide(num_1, num_2):
         raise ValueError ("Cannot divide by zero")
     return num_1 / num_2
 
+def floor_division(num_1, num_2):
+    if num_2 == 0:
+        raise ValueError ("Cannot divide by zero")
+    return num_1 // num_2
+
+def modulus (num_1, num_2):
+    if num_2 == 0:
+        raise ValueError ("Cannot modulo by zero")
+    return num_1 % num_2
+
+def power (num_1, num_2):
+    return num_1 ** num_2
+
+def square_root(num_1, _):
+    if num_1 < 0:
+        raise ValueError ("Cannot take the square root of a negative number")
+    return math.sqrt(num_1)
+
+def cube_root (num_1, _):
+    return math.copysign(abs(num_1) * (1/3), num_1)
+
+OPERATIONS = {
+    "Addition": (add, "+", True),
+    "Subtraction": (subtract, "-", True),
+    "Multiplication": (multiply, "*", True),
+    "Division": (divide, "/", True),
+    "Floor Division": (floor_division, "//", True),
+    "Modulus": (modulus, "%", True),
+    "Exponent": (power, "**", True),
+    "Square Root": (square_root, "sqrt", False),
+    "Cube Root": (cube_root, "cbrt", False),
+}
+
 def calculate(operation, num_1, num_2):
-    ops = {
-        "Addition": (add, "+"),
-        "Subtraction": (subtract, "-"),
-        "Multiplication": (multiply, "*"),
-        "Division": (divide, "/")
-    }
-    func, symbol = ops[operation]
+
+    func, symbol = OPERATIONS[operation]
     return symbol, func(num_1, num_2)
 #Returns a float value
 def format_result(value):
@@ -46,59 +75,62 @@ class SimpleCalculatorApp(tk. Tk):
     def __init__(self):
         super().__init__()
         self.title("Calculator")
-        self.resizable(width=False, height=False)
+        self.resizable(width=True, height=True)
         self.configure(bg=self.BG)
-
         self._build_ui()
-        self._center_window(480,600)
+        self._center_window(500,600)
 
     def _build_ui(self):
-        pad = dict(padx=24, pady=8)
+        pad = dict(padx=24, pady=6)
 
         tk.Label(
-            self, text="Calculator",
-            bg = self.BG,
-            fg = self.WHITE,
-            font = ("Segoe UI", 18, "bold")
-        ).pack(pady = (28, 4))
+            self, text="Calculator", bg = self.BG, fg = self.WHITE,
+            font = ("Segoe UI", 18, "bold")).pack(pady = (28, 4))
 
         tk.Label(
             self, text="Choose an operation and enter two numbers",
             bg=self.BG, fg=self.SUBTEXT,
-            font=("Segoe UI", 10)
-        ).pack(pady=(0, 16))
+            font=("Segoe UI", 10)).pack(pady=(0, 16))
 
         tk.Label(
-            self, text = "Operations",
-            bg = self.BG, fg = self.SUBTEXT,
-            font = ("Segoe UI", 9, "bold"), anchor = "w"
-        ).pack(fill = "x", **pad)
+            self, text = "Operations", bg = self.BG, fg = self.SUBTEXT,
+            font = ("Segoe UI", 9, "bold"), anchor = "w").pack(fill = "x", **pad)
 
         self.operation_var = tk.StringVar(value = "Addition")
-        op_frame = tk.Frame(self, bg = self.PANEL, bd = 0)
-        op_frame.pack(fill = "x", padx = 24, pady = (0,12))
+        self.operation_var.trace_add("write", self._on_operation_change)
 
-        operations = [
-            ("➕  Addition", "Addition"),
-            ("➖  Subtraction", "Subtraction"),
-            ("✖️  Multiplication", "Multiplication"),
-            ("➗  Division", "Division"),
-        ]
-        for col, (label, value) in enumerate(operations):
-            rb = tk.Radiobutton(
-                op_frame, text = label, variable = self.operation_var, value = value,
-                bg = self.PANEL, fg = self.TEXT, selectcolor = self.ACCENT,
-                activebackground = self.PANEL, activeforeground = self.WHITE,
-                font = ("Segoe UI", 10), indicatoron = True, bd = 0,
-                highlightthickness = 0
-            )
-            rb.grid(row = col // 2, column = col % 2, sticky = "w", padx =12, pady = 6)
+        operation_names = list(OPERATIONS.keys())
+        dropdown= tk.OptionMenu(self, self.operation_var, *operation_names)
+        dropdown.config(
+            bg = self.PANEL, fg = self.WHITE, activebackground = self.ACCENT,
+            activeforeground = self.WHITE, font = ("Segoe UI", 11),
+            relief = "flat", bd = 0, highlightthickness = 0,
+            indicatoron = True, anchor = "w", width = 36
+        )
+        dropdown ["menu"].config(
+            bg = self.PANEL, fg = self.WHITE, activebackground = self.ACCENT,
+            activeforeground = self.WHITE, font = ("Segoe UI", 10),
+            relief = "flat"
+        )
+        dropdown.pack(fill = "x", padx = 24, pady = (0,10))
+
 
         self.num1_var = tk.StringVar()
-        self.num2_var = tk.StringVar()
-
         self._make_input(pad, "First Number", self.num1_var)
-        self._make_input(pad, "Second Number", self.num2_var)
+
+        self.num2_var = tk.StringVar()
+        self.num2_label = tk.Label(self, text = "Second Number", bg = self.BG,
+                                   fg = self.SUBTEXT, font = ("Segoe UI", 9, "bold"),
+                                   anchor = "w")
+        self.num2_label.pack(fill = "x", **pad)
+        self.num2_entry = tk.Entry(
+            self, textvariable = self.num2_var,
+            bg = self.PANEL, fg  =self.WHITE, insertbackground = self.WHITE,
+            relief = "flat", font = ("Segoe UI", 13),
+            highlightthickness = 2, highlightbackground = self.PANEL,
+            highlightcolor = self.ACCENT,
+        )
+        self.num2_entry.pack(fill = "x", padx = 24, pady = (0,8), ipadx = 6, ipady = 8)
 
         tk.Button(
             self, text = "Calculate",
@@ -108,29 +140,26 @@ class SimpleCalculatorApp(tk. Tk):
             relief = "flat", cursor = "hand2", bd = 0,
             padx = 18, pady = 10,
             command = self._on_calculate
-        ).pack(pady = (18,10))
+        ).pack(pady = (14,8))
 
         result_frame = tk.Frame(self, bg = self.PANEL, bd = 0)
         result_frame.pack(fill = "x", padx = 24, pady = 8)
 
-        tk.Label(
-            result_frame, text = "Result",
-            bg = self.PANEL, fg = self.SUBTEXT,
-            font = ("Segoe UI", 9, "bold"),
-        ).pack (anchor = "w", padx = 14, pady = (10, 2))
+        tk.Label(result_frame, text = "Result", bg = self.PANEL, fg = self.SUBTEXT,
+            font = ("Segoe UI", 9, "bold"),).pack (anchor = "w", padx = 14, pady = (10, 2))
 
         self.result_label = tk.Label(
             result_frame, text = "-",
             bg = self.PANEL, fg = self.SUCCESS,
-            font = ("Segeo UI", 15, "bold"),
-            wraplength = 360,
+            font = ("Segoe UI", 15, "bold"),
+            wraplength = 440,
             justify = "left",
             anchor = "w"
         )
-        self.result_label.pack(anchor = "w", padx = 14, pady = (0, 12))
+        self.result_label.pack(anchor = "w", padx = 14, pady = (0, 16))
 
         button_row = tk.Frame(self, bg = self.BG)
-        button_row.pack(pady = (10, 0))
+        button_row.pack(pady = (8, 0))
 
         tk.Button(
             button_row, text = "Try Again",
@@ -166,6 +195,19 @@ class SimpleCalculatorApp(tk. Tk):
             highlightcolor = self.ACCENT,
         )
         entry.pack(fill = "x", padx = 24, pady = (0,8), ipadx =6, ipady = 8)
+#second number depends on the operation chosen
+def _on_operation_change(self, *_):
+    operation_2nd_num = self.operation_var.get()
+    _,_, needs_second = OPERATIONS.get(operation_2nd_num, (None, None, True))
+    state = "normal" if needs_second else "disabled"
+    self.num2_entry.config(state = state)
+    fg_color = self.SUBTEXT if needs_second else "#555570"
+    self.num2_label.config(fg=fg_color)
+    if not needs_second:
+        self.num2_var.set("-")
+    else:
+        if self.num2_var.get() == "-":
+            self.num2_var.set("")
 #exception handlers
 #ensures that input should be numbers only
     def _on_calculate(self):
@@ -174,19 +216,28 @@ class SimpleCalculatorApp(tk. Tk):
         except ValueError:
             self._show_error("First input is invalid. Enter a numerical value")
             return
+        operation_2nd_num = self.operation_var.get()
+        _,_, needs_second = OPERATIONS[operation_2nd_num]
+        if needs_second:
+            try:
+                num_2 = float(self.num2_var.get().strip())
+            except ValueError:
+                self._show_error("Second input is invalid. Enter a numerical value")
+                return
+        else:
+            num_2 = 0.0
 
-        try:
-            num_2 = float(self.num2_var.get().strip())
-        except ValueError:
-            self._show_error("Second input is invalid. Enter a numerical value")
-            return
+
+
 #perform calculation
         try:
-            operation = self.operation_var.get()
-            symbol, result = calculate(operation, num_1, num_2)
+            symbol, result = calculate(operation_2nd_num, num_1, num_2)
             formatted = f"{float(result):.4f}"
-            expression = f"{float(num_1):.4f} {symbol} {float(num_2):.4f} = {formatted}"
-            self.result_label.config(text = expression, fg = self.SUCCESS)
+            if needs_second:
+                expression = f"{float(num_1):.4f} {symbol} {float(num_2):.4f} = {formatted}"
+            else:
+                expression = f"{symbol}(float(num_1):.4f) = {formatted}"
+            self.result_label.config(text=expression, fg=self.SUCCESS)
         except ValueError as e:
             self._show_error(str(e))
 
